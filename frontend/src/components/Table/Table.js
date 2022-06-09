@@ -5,6 +5,7 @@ import server_api from "../../api/server_api";
 import * as tableActions from "../../store/table/actions";
 import Loading from "../Loading/Loading";
 import "./Table.css";
+import Filters from "../Filters/Filters";
 
 const Table = () => {
   const [page, setPage] = useState(1);
@@ -50,6 +51,7 @@ const Table = () => {
       {loading && <Loading />}
       {!loading && (
         <>
+          <Filters page={page} limit={limit} />
           <table>
             <thead>
               <tr>

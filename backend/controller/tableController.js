@@ -21,24 +21,63 @@ class TableController {
   }
   async getElements(req, res) {
     try {
-      let { p = 1, lim = 10 } = req.params;
-      let count = await db.query(
-        `SELECT count(*) FROM ${process.env.NAME_TABLE}`
-      );
-      count = count.rows[0].count;
-      console.log((p - 1) * lim);
-      if (count <= (p - 1) * lim) {
-        p = Math.floor(count / lim);
-        console.log(p);
+      const { column, condition, text, wm } = req.body;
+      let settingString;
+      switch (column) {
+        case "name": {
+          switch (condition) {
+            case "=": {
+              settingString = `GROUP BY name,id HAVING name = ${text}`;
+              break;
+            }
+            case "includes": {
+              settingString = `GROUP BY name,id WHERE name LIKE %${text}%`;
+              break;
+            }
+          }
+          break;
+        }
+        case "numberOf": {
+          settingString = `GROUP BY numberOf,id HAVING numberOf ${condition} ${text}`;
+          break;
+        }
+        case "distance": {
+          settingString = ` GROUP BY distance,id HAVING distance ${condition} ${text}`;
+          break;
+        }
+        default: {
+          settingString = "";
+          break;
+        }
       }
-      const allDB = await db.query(
-        `SELECT * from ${process.env.NAME_TABLE} OFFSET ${
-          (p - 1) * lim
-        } LIMIT ${lim}`
+      let { p = 1, lim = 10 } = req.params;
+      console.log(
+        `SELECT count(*) FROM ${process.env.NAME_TABLE} ${settingString}`
       );
+      let count = await db.query(
+        `SELECT count(*) FROM ${process.env.NAME_TABLE} ${settingString}`
+      );
+      console.log(count);
+      if (wm !== "count") {
+        count = count.rows[0].count;
+        console.log((p - 1) * lim);
+        if (count < (p - 1) * lim) {
+          p = Math.floor(count / lim);
+          console.log(p);
+        }
+        const allDB = await db.query(
+          `SELECT * from ${process.env.NAME_TABLE} ${settingString} OFFSET ${
+            (p - 1) * lim
+          } LIMIT ${lim} `
+        );
 
-      res.send({ elements: allDB.rows, maxPage: Math.floor(count / lim) });
+        res.send({ elements: allDB.rows, maxPage: Math.floor(count / lim) });
+      } else {
+        count = count.rowCount;
+        res.send({ maxPage: count });
+      }
     } catch (e) {
+      res.send({ maxPage: 0, elements: [] });
       console.log(e);
     }
   }

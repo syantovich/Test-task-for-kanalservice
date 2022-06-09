@@ -9,6 +9,7 @@ export const newData = (elements, set) => (dispatch) => {
   set(false);
   dispatch({ type: TABLE_ACTIONS.addAll, payload: elements });
 };
+export const countElementWithSettings = (settings) => (dispatch) => {};
 export const addNewElem =
   ({ date, name, numberOf, distance }) =>
   async (dispatch) => {

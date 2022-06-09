@@ -1,0 +1,35 @@
+.select {
+
+    border-radius: 5px;
+    margin: 20px 2%;
+    width: 220px;
+}
+
+.select >select:active,
+.select> select:focus {
+    background:blanchedalmond;
+}
+select > option {
+    border: 0;
+    background:#bdbdbd;
+    padding-right: 15px;
+    height: 31px;
+    width: 220px;
+}
+select > option:nth-child(odd) {
+    background: #817d7d;
+}
+.select> select {
+    margin: 5px 0;
+    width: 100%;
+    color: black;
+    font-size: 14px;
+    font-family: 'Helvetica Neue', Helvetica, sans-serif;
+    line-height: 2.5;
+    border: 1px solid #bdbdbd;
+    border-radius: 0.25rem;
+    background: transparent;
+    overflow: hidden;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+}

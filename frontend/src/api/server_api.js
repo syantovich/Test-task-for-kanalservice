@@ -10,8 +10,14 @@ const server_api = {
       name,
     });
   },
-  getAllDB(page, limit) {
-    return axios.get(`${SERVER_API}element/${page}/${limit}`);
+  getAllDB(page, limit, setting = {}) {
+    return axios.post(`${SERVER_API}element/${page}/${limit}`, setting);
+  },
+  getElementsWithSettings(settings, page, limit, wm) {
+    return axios.post(`${SERVER_API}element/${page}/${limit}`, {
+      settings,
+      wm,
+    });
   },
 };
 export default server_api;
