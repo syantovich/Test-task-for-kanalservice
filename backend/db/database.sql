@@ -1,4 +1,4 @@
-CREATE TABLE  test(
+CREATE TABLE  kanal(
     id  SERIAL PRIMARY KEY,
     date Date,
     name VARCHAR(255),

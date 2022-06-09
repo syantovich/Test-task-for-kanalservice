@@ -1,0 +1,31 @@
+.pagination .prev,.next{
+    margin: 20px;
+    width:20px;
+    height: 20px;
+    border-bottom: 1px solid black;
+    border-left: 1px solid black;
+
+}
+.pagination .prev:hover,.next:hover{
+    cursor: pointer;
+}
+.pagination .prev{
+    transform: rotate(45deg);
+}
+.pagination .next{
+    transform: rotate(225deg);
+}
+.pagination{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    bottom: -100%;
+}
+.table{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+
+}
