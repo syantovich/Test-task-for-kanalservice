@@ -8,7 +8,6 @@ export const tableReducer = (state = initialState, action) => {
       return action.payload;
     }
     case TABLE_ACTIONS.addNewElem: {
-      console.log(state);
       const newArr = [...state];
       newArr.push(action.payload);
       return newArr;

@@ -5,7 +5,6 @@ import AddItem from "../../components/AddItem/AddItem";
 const Main = () => {
   return (
     <main>
-      <AddItem />
       <Table />
     </main>
   );

@@ -3,6 +3,8 @@ import { useState } from "react";
 import { useDispatch } from "react-redux";
 import "./AddItem.css";
 
+// in this component you can add a new element to DB
+// All checks happen on the server
 const AddItem = () => {
   const [numberOf, setNumberOf] = useState();
   const [distance, setDistance] = useState();
