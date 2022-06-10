@@ -11,7 +11,6 @@ class TableController {
           `INSERT INTO ${process.env.NAME_TABLE}(date,numberOf,name,distance) values ($1,$2,$3,$4) RETURNING *`,
           [new Date(date), +numberOf, name, +distance]
         );
-        console.log(addingToDB.rows[0].id);
         res.send(addingToDB.rows[0]);
       }
     } catch (e) {
@@ -23,26 +22,56 @@ class TableController {
     try {
       const { column, condition, text, wm } = req.body;
       let settingString;
+      let filter = false;
       switch (column) {
         case "name": {
           switch (condition) {
             case "=": {
-              settingString = `GROUP BY name,id HAVING name = ${text}`;
+              filter = "=";
+              settingString = ``;
               break;
             }
             case "includes": {
-              settingString = `GROUP BY name,id WHERE name LIKE %${text}%`;
+              filter = "includes";
+              settingString = ``;
               break;
             }
           }
           break;
         }
         case "numberOf": {
-          settingString = `GROUP BY numberOf,id HAVING numberOf ${condition} ${text}`;
+          switch (condition) {
+            case "=": {
+              settingString = `where  numberOf = ${text}`;
+              break;
+            }
+            case "<": {
+              settingString = ` GROUP BY numberOf,id HAVING numberOf${condition}${text}`;
+              break;
+            }
+            case ">": {
+              settingString = ` GROUP BY numberOf,id HAVING numberOf${condition}${text}`;
+              break;
+            }
+          }
           break;
         }
         case "distance": {
-          settingString = ` GROUP BY distance,id HAVING distance ${condition} ${text}`;
+          switch (condition) {
+            case "=": {
+              const nameText = `${text}`;
+              settingString = `where  distance = ${nameText}`;
+              break;
+            }
+            case "<": {
+              settingString = `GROUP BY distance,id HAVING distance ${condition} ${text}`;
+              break;
+            }
+            case ">": {
+              settingString = `GROUP BY distance,id HAVING distance ${condition} ${text}`;
+              break;
+            }
+          }
           break;
         }
         default: {
@@ -51,34 +80,79 @@ class TableController {
         }
       }
       let { p = 1, lim = 10 } = req.params;
-      console.log(
-        `SELECT count(*) FROM ${process.env.NAME_TABLE} ${settingString}`
-      );
+
+      let params = "*";
+
       let count = await db.query(
-        `SELECT count(*) FROM ${process.env.NAME_TABLE} ${settingString}`
+        `SELECT ${params} FROM ${process.env.NAME_TABLE} ${settingString}`
       );
-      console.log(count);
+
+      switch (filter) {
+        case "=":
+          count.rows = count.rows.filter((e) => e.name === text);
+          break;
+        case "includes":
+          count.rows = count.rows.filter((e) => {
+            return e.name.includes(text);
+          });
+          break;
+      }
+
       if (wm !== "count") {
-        count = count.rows[0].count;
-        console.log((p - 1) * lim);
+        const maxPage = count.rows.length;
+        count.rows = count.rows.filter(
+          (e, i) => i >= (p - 1) * lim && i < p * lim
+        );
         if (count < (p - 1) * lim) {
           p = Math.floor(count / lim);
-          console.log(p);
         }
-        const allDB = await db.query(
-          `SELECT * from ${process.env.NAME_TABLE} ${settingString} OFFSET ${
-            (p - 1) * lim
-          } LIMIT ${lim} `
-        );
+        switch (filter) {
+          case "=":
+            {
+              res.send({
+                elements: count.rows.filter(
+                  (e, i) => i >= (p - 1) * lim && i < p * lim
+                ),
+                maxPage: Math.ceil(maxPage / lim),
+                page: p,
+              });
+            }
+            break;
+          case "includes":
+            {
+              let filteredArr = count.rows.filter(
+                (e, i) => i >= (p - 1) * lim && i < p * lim
+              );
+              res.send({
+                elements: filteredArr.length > 0 ? filteredArr : null,
+                maxPage: Math.ceil(maxPage / lim),
+                page: p,
+              });
+            }
+            break;
+          default:
+            {
+              const allDB = await db.query(
+                `SELECT * from ${process.env.NAME_TABLE} ${settingString}  `
+              );
+              let filteredArr = allDB.rows.filter((e, i) => {
+                return i >= (p - 1) * lim && i < p * lim;
+              });
 
-        res.send({ elements: allDB.rows, maxPage: Math.floor(count / lim) });
+              res.send({
+                elements: filteredArr.length > 0 ? filteredArr : null,
+                maxPage: Math.ceil(maxPage / lim),
+                page: p,
+              });
+            }
+            break;
+        }
       } else {
-        count = count.rowCount;
-        res.send({ maxPage: count });
+        res.send({ maxPage: count.rows.length, page: p });
       }
     } catch (e) {
-      res.send({ maxPage: 0, elements: [] });
       console.log(e);
+      res.send({ maxPage: 0, elements: null, page: 1 });
     }
   }
 }
